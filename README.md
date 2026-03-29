@@ -1,17 +1,31 @@
 # Minecraft Plugins Maker (MPM)
 
-MPM — это программа на Python, которая позволяет создавать плагины для Minecraft без программирования.
+MPM is a desktop app that helps users create Minecraft plugin templates without writing everything from scratch.
 
-## Поддерживаемые платформы (v1.0)
-- Paper / Spigot / Purpur (Java)
-- LeviLamina (Bedrock C++)
+## Supported Targets
+- Paper / Spigot / Purpur (Java plugin skeleton)
+- LeviLamina (Bedrock C++ plugin skeleton)
 
-## Возможности
-- Создание нового проекта
-- Выбор платформы
-- Редактор событий
-- Редактор команд
-- Генерация структуры проекта
-- Генерация минимального кода плагина
+## Current Features
+- New project wizard
+- Platform selection
+- Project structure generation
+- Minimal starter source files for selected platform
 
-## Структура проекта
+## Tech Stack
+- Python 3.13
+- PySide6 (desktop UI)
+
+## Quick Start
+```bash
+python -m pip install -r requirements-dev.txt
+python app.py
+```
+
+## Run Tests
+```bash
+python -m pytest -q
+```
+
+## Changelog
+Project history is tracked in `CHANGELOG.md`.

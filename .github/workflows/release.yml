@@ -1,0 +1,89 @@
+name: Release
+
+on:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: write
+
+jobs:
+  update-release-notes:
+    name: Fill release notes from CHANGELOG
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Build notes file from CHANGELOG
+        run: >
+          python .github/scripts/extract_changelog.py
+          --tag "${{ github.event.release.tag_name }}"
+          --output .github/release-notes.md
+
+      - name: Update release body
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          body_path: .github/release-notes.md
+          append_body: false
+
+  build-and-upload:
+    name: Build ${{ matrix.platform }}
+    needs: update-release-notes
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux-x64
+          - os: macos-latest
+            platform: macos-x64
+          - os: windows-latest
+            platform: windows-x64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt
+
+      - name: Build binary
+        run: >
+          python -m PyInstaller --noconfirm --clean --onefile --windowed
+          --name mpm app.py
+
+      - name: Package and checksum
+        run: >
+          python .github/scripts/create_release_assets.py
+          --project-name mpm
+          --version ${{ github.event.release.tag_name }}
+          --platform ${{ matrix.platform }}
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: |
+            release/*.zip
+            release/*.sha256
+          fail_on_unmatched_files: true
