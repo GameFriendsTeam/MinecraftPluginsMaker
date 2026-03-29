@@ -4,7 +4,7 @@ import argparse
 import re
 from pathlib import Path
 
-HEADER_RE = re.compile(r"^##\s+\[?([^\]\s]+)\]?(?:\s*-\s*.+)?\s*$")
+HEADER_RE = re.compile(r"^#{2,6}\s+\[([^\]]+)\](?:\s*-\s*.+)?\s*$")
 
 
 def normalize_tag(tag: str) -> str:
@@ -31,7 +31,7 @@ def extract_notes(changelog_text: str, tag: str) -> str:
     start_index = None
     for index, line in enumerate(lines):
         match = HEADER_RE.match(line.strip())
-        if match and match.group(1) in versions:
+        if match and match.group(1).strip() in versions:
             start_index = index + 1
             break
 
@@ -40,7 +40,7 @@ def extract_notes(changelog_text: str, tag: str) -> str:
         for line in lines:
             match = HEADER_RE.match(line.strip())
             if match:
-                known_versions.append(match.group(1))
+                known_versions.append(match.group(1).strip())
         known_versions_display = ", ".join(known_versions) or "none"
         raise ValueError(
             f"Version for tag '{tag}' not found in changelog. Known versions: {known_versions_display}"
@@ -48,7 +48,7 @@ def extract_notes(changelog_text: str, tag: str) -> str:
 
     end_index = len(lines)
     for index in range(start_index, len(lines)):
-        if lines[index].strip().startswith("## "):
+        if HEADER_RE.match(lines[index].strip()):
             end_index = index
             break
 
