@@ -28,7 +28,7 @@ jobs:
           --output .github/release-notes.md
 
       - name: Update release body
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ github.event.release.tag_name }}
           body_path: .github/release-notes.md
@@ -80,7 +80,7 @@ jobs:
           --platform ${{ matrix.platform }}
 
       - name: Upload release assets
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ github.event.release.tag_name }}
           files: |
